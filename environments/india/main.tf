@@ -1,30 +1,43 @@
 
 module "resource_groups" {
-  source = "../../modules/resource-groups"
-  location_code = var.location_code
+  source              = "../../modules/resource-groups"
+  location_code       = var.location_code
   datacenter_location = var.datacenter_location
-  tags = local.common_tags
+  tags                = local.common_tags
+
+  resource_groups = {
+    network = true
+    storage = true
+  }
 }
 
 module "network" {
-   source = "../../modules/network"
-   location_code = var.location_code
-   datacenter_location = var.datacenter_location
-   resource_group_name = module.resource_groups.network_rg_name
-   address_space = ["10.203.8.0/21"]
-   subnets = {
-    server   = ["10.203.8.0/24"]
+  source              = "../../modules/network"
+  location_code       = var.location_code
+  datacenter_location = var.datacenter_location
+  resource_group_name = module.resource_groups.resource_group_names["network"]
+  address_space       = ["10.203.8.0/21"]
+  subnets = {
+    gateway  = ["10.203.8.0/24"]
     services = ["10.203.9.0/24"]
-    test = ["10.203.10.0/24"]
-    }
-   tags = local.common_tags
+  }
+  tags = local.common_tags
 }
 
- 
-module "storage" {
-  source = "../../modules/storage"
-   location_code = var.location_code
-   datacenter_location = var.datacenter_location
-   resource_group_name = module.resource_groups.infra_rg_name
-   tags = local.common_tags
+module "vpn-gateway" {
+  source              = "../../modules/vpn-gateway"
+  location_code       = var.location_code
+  datacenter_location = var.datacenter_location
+  resource_group_name = module.resource_groups.resource_group_names["network"]
+  gateway_subnet_id   = module.network.gateway_subnet_id
+  tags                = local.common_tags
 }
+
+module "storage" {
+  source              = "../../modules/storage"
+  location_code       = var.location_code
+  datacenter_location = var.datacenter_location
+  resource_group_name = module.resource_groups.resource_group_names["storage"]
+  tags                = local.common_tags
+}
+

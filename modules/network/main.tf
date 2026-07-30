@@ -5,27 +5,21 @@ resource "azurerm_virtual_network" "main" {
   name                = "vnet-${var.location_code}-main"
   location            = var.datacenter_location
   resource_group_name = var.resource_group_name
-
-  address_space = var.address_space #  ["10.203.8.0/21"]
-
-  tags = var.tags
+  address_space       = var.address_space #  ["10.203.8.0/21"]
+  tags                = var.tags
 }
 # /22 -> 255.255.252.0 -> 1024 Adressen -> 4 Subnetze
 # /21 -> 255.255.256.0 -> 2048 Adressen -> 8 Subnetze
 
 
+
 resource "azurerm_subnet" "subnets" {
-
   for_each = var.subnets
-
-  name = "snet-${var.location_code}-${each.key}"
-
+  # name = "snet-${var.location_code}-${each.key}"
+  name                 = each.key == "gateway" ? "GatewaySubnet" : "snet-${var.location_code}-${each.key}"
   resource_group_name  = var.resource_group_name
-
   virtual_network_name = azurerm_virtual_network.main.name
-
-  address_prefixes = each.value
-
+  address_prefixes     = each.value
 }
 
 

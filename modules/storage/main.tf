@@ -8,30 +8,32 @@ resource "azurerm_storage_account" "files" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
+  public_network_access_enabled = false
+
   tags = var.tags
 }
 
 resource "azurerm_storage_share" "department" {
-  name = "department"
+  name               = "department"
   storage_account_id = azurerm_storage_account.files.id
-  quota = 100
+  quota              = 100
 }
 
 
 resource "azurerm_storage_share" "home" {
-  name = "home"
+  name               = "home"
   storage_account_id = azurerm_storage_account.files.id
-  quota = 100
+  quota              = 100
 }
 
 resource "azurerm_storage_share" "common" {
-  name = "common"
+  name               = "common"
   storage_account_id = azurerm_storage_account.files.id
-  quota = 100
+  quota              = 100
 }
 
 resource "azurerm_storage_share" "applications" {
-  name = "applications"
+  name               = "applications"
   storage_account_id = azurerm_storage_account.files.id
-  quota = 100
+  quota              = 100
 }

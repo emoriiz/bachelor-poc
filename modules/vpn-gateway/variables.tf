@@ -1,7 +1,5 @@
 variable "location_code" {}
 variable "datacenter_location" {}
 variable "tags" {}
-variable "resource_groups" {
-  type    = map(bool)
-  default = {}
-}
+variable "resource_group_name" {}
+variable "gateway_subnet_id" {}

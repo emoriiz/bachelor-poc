@@ -1,17 +1,14 @@
-# Netzwerk Reccourcengruppe
-# enthält: VNET, NSG, Route Tables, Private DNS
-resource "azurerm_resource_group" "network" {
-  name     = "rg-${var.location_code}-network"
-  location = var.datacenter_location
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group
+# https://developer.hashicorp.com/terraform/language/meta-arguments/for_each
 
-  tags = var.tags
+locals {
+  enabled_resource_groups = { for k, enabled in var.resource_groups : k => enabled if enabled }
 }
 
-# Infrastruktur Reccourcengruppe
-# enthält: VMs, Azure Services, Azure Files, Domain Services
-resource "azurerm_resource_group" "infra" {
-  name     = "rg-${var.location_code}-infra"
-  location = var.datacenter_location
+resource "azurerm_resource_group" "group" {
+  for_each = local.enabled_resource_groups
 
-  tags = var.tags
+  name     = "rg-${var.location_code}-${each.key}"
+  location = var.datacenter_location
+  tags     = var.tags
 }
