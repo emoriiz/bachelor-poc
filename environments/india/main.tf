@@ -1,4 +1,3 @@
-
 module "resource_groups" {
   source              = "../../modules/resource-groups"
   location_code       = var.location_code
@@ -8,36 +7,57 @@ module "resource_groups" {
   resource_groups = {
     network = true
     storage = true
+    dns = true
+    infra = true
   }
 }
 
+
 module "network" {
-  source              = "../../modules/network"
-  location_code       = var.location_code
-  datacenter_location = var.datacenter_location
+  source                      = "../../modules/network"
+  location_code               = var.location_code
+  datacenter_location         = var.datacenter_location
   resource_group_name = module.resource_groups.resource_group_names["network"]
-  address_space       = ["10.203.8.0/21"]
+  address_space               = ["10.203.8.0/21"]
   subnets = {
-    gateway  = ["10.203.8.0/24"]
-    services = ["10.203.9.0/24"]
+    gateway         = ["10.203.8.0/24"]
+    services        = ["10.203.9.0/24"]
   }
   tags = local.common_tags
 }
 
-module "vpn-gateway" {
-  source              = "../../modules/vpn-gateway"
-  location_code       = var.location_code
-  datacenter_location = var.datacenter_location
-  resource_group_name = module.resource_groups.resource_group_names["network"]
-  gateway_subnet_id   = module.network.gateway_subnet_id
-  tags                = local.common_tags
-}
+
+# module "vpn-gateway" {
+#   source              = "../../modules/vpn-gateway"
+#   location_code       = var.location_code
+#   datacenter_location = var.datacenter_location
+#   resource_group_name = module.resource_groups.resource_group_names["network"]
+#   gateway_subnet_id   = module.network.gateway_subnet_id
+#   tags                = local.common_tags
+# }
+
 
 module "storage" {
-  source              = "../../modules/storage"
-  location_code       = var.location_code
-  datacenter_location = var.datacenter_location
-  resource_group_name = module.resource_groups.resource_group_names["storage"]
-  tags                = local.common_tags
+  source                      = "../../modules/storage"
+  location_code               = var.location_code
+  datacenter_location         = var.datacenter_location
+  resource_group_name_storage = module.resource_groups.resource_group_names["storage"]
+  resource_group_name_dns     = module.resource_groups.resource_group_names["dns"]
+  vnet_id                     = module.network.vnet_id
+  subnet_id                   = module.network.subnet_ids["services"]
+  tags                        = local.common_tags
 }
 
+
+# module "virtual-machine" {
+#   source = "../../modules/virtual-machine"
+#   location_code       = var.location_code
+#   datacenter_location = var.datacenter_location
+#   resource_group_name = module.resource_groups.resource_group_names["infra"]
+#   subnet_id = module.network.subnet_ids["services"]
+#   vm_name = "dc-01"
+#   vm_size = "Standard_DS1_v2"
+#   vm_sku = "2025-datacenter-azure-edition"
+#   tags = local.common_tags
+#   admin_password = var.admin_password
+# }

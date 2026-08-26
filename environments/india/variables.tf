@@ -25,3 +25,7 @@ variable "owner" {
 variable "project" {
   type = string
 }
+
+variable "admin_password" {
+  sensitive = true
+}

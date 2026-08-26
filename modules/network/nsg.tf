@@ -15,7 +15,11 @@ resource "azurerm_network_security_group" "subnets" {
 
 # Network Security Groups den Subnetzen zuweisen
 resource "azurerm_subnet_network_security_group_association" "subnets" {
-  for_each                  = var.subnets
+  # for_each                  = var.subnets
+  for_each = {
+    for k, v in var.subnets :
+    k => v if k != "gateway"
+  }
   subnet_id                 = azurerm_subnet.subnets[each.key].id
   network_security_group_id = azurerm_network_security_group.subnets[each.key].id
 }
