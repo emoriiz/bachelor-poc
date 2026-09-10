@@ -13,7 +13,7 @@ resource "azurerm_public_ip" "vpn" {
 }
 
 resource "azurerm_virtual_network_gateway" "vpn" {
-  name                = "vpngw-${var.location_code}"
+  name                = "gw-${var.location_code}-vpn"
   location            = var.datacenter_location
   resource_group_name = var.resource_group_name
   type                = "Vpn"
