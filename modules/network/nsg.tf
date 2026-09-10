@@ -3,7 +3,7 @@
 
 # Azure hat bereits Standardregeln definiert wie: VNET intern erlaubt, Azure Load Balancer erlaubt, Internet inbound blockiert
 
-# Network Security Groups erstellen
+# Eine NSG pro Subnetz, außer dem GatewaySubnet (Azure erlaubt dort keine NSG)
 resource "azurerm_network_security_group" "subnets" {
   for_each = {
     for k, v in var.subnets : k => v
@@ -16,14 +16,13 @@ resource "azurerm_network_security_group" "subnets" {
   tags                = var.tags
 }
 
-
-# Network Security Groups den Subnetzen zuweisen (GatewaySubnet ignoriert)
+# Verknüpft jede NSG mit ihrem Subnetz
 resource "azurerm_subnet_network_security_group_association" "subnets" {
-  # for_each                  = var.subnets
   for_each = {
-    for k, v in var.subnets :
-    k => v if k != "gateway"
+    for k, v in var.subnets : k => v
+    if k != "gateway"
   }
+
   subnet_id                 = azurerm_subnet.subnets[each.key].id
   network_security_group_id = azurerm_network_security_group.subnets[each.key].id
 }

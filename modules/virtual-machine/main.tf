@@ -1,7 +1,7 @@
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface
 # https://registry.terraform.io/providers/hashicorp/Azurerm/latest/docs/resources/windows_virtual_machine
 
-# Netzwerk Interface
+# Netzwerkkarte der VM, optional mit fester IP (z.B. wenn die VM als DNS-Server dient)
 resource "azurerm_network_interface" "vm" {
   name                = "nic-${var.location_code}-${var.vm_name}"
   location            = var.datacenter_location
@@ -10,21 +10,22 @@ resource "azurerm_network_interface" "vm" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = var.subnet_id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = var.private_ip_address == null ? "Dynamic" : "Static"
+    private_ip_address            = var.private_ip_address
   }
 
   tags = var.tags
 }
 
-# Virtuelle Maschine
+# Windows-VM für den PoC (z.B. Domain-Controller/DNS-Server, Testclient für Files/VPN)
 resource "azurerm_windows_virtual_machine" "vm" {
   name                = "vm-${var.location_code}-${var.vm_name}"
   resource_group_name = var.resource_group_name
   location            = var.datacenter_location
-  size           = var.vm_size
-  admin_username = "azureadmin"
-  admin_password = var.admin_password
-  patch_mode = "AutomaticByPlatform"
+  size                = var.vm_size
+  admin_username      = "azureadmin"
+  admin_password      = var.admin_password
+  patch_mode          = "AutomaticByPlatform"
   network_interface_ids = [
     azurerm_network_interface.vm.id
   ]

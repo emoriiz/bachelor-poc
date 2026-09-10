@@ -38,18 +38,17 @@ resource "azurerm_storage_share" "applications" {
   quota              = 100
 }
 
-
-
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link
 # https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns
 # https://learn.microsoft.com/en-us/azure/storage/files/storage-files-networking-dns
 
-# Private DNS Zone anlegen 
+# Private DNS Zone für Azure Files, damit der Storage-Name im VNet auf die private IP auflöst
 resource "azurerm_private_dns_zone" "files" {
   name                = "privatelink.file.core.windows.net"
   resource_group_name = var.resource_group_name_dns
 }
 
+# Verknüpft die Zone mit dem VNet, sonst gilt sie dort nicht
 resource "azurerm_private_dns_zone_virtual_network_link" "files_link" {
   name                  = "link-${var.location_code}"
   private_dns_zone_name = azurerm_private_dns_zone.files.name
@@ -57,11 +56,9 @@ resource "azurerm_private_dns_zone_virtual_network_link" "files_link" {
   virtual_network_id    = var.vnet_id
 }
 
-
-
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint
 
-# Private Endpoint für Azure Files
+# Private Endpoint für Azure Files samt automatischem DNS-Eintrag in der Zone oben
 resource "azurerm_private_endpoint" "files" {
   name                = "pe-${var.location_code}-storage"
   location            = var.datacenter_location
@@ -83,54 +80,3 @@ resource "azurerm_private_endpoint" "files" {
     ]
   }
 }
-
-
-
-
-
-
-
-
-
-# # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint
-# 
-# resource "azurerm_lb" "example" {
-#   name                = "example-lb"
-#   sku                 = "Standard"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-# 
-#   frontend_ip_configuration {
-#     name                 = azurerm_public_ip.example.name
-#     public_ip_address_id = azurerm_public_ip.example.id
-#   }
-# }
-# 
-# resource "azurerm_private_link_service" "example" {
-#   name                = "example-privatelink"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-# 
-#   nat_ip_configuration {
-#     name      = azurerm_public_ip.example.name
-#     primary   = true
-#     subnet_id = azurerm_subnet.service.id
-#   }
-# 
-#   load_balancer_frontend_ip_configuration_ids = [
-#     azurerm_lb.example.frontend_ip_configuration[0].id,
-#   ]
-# }
-# 
-# resource "azurerm_private_endpoint" "example" {
-#   name                = "example-endpoint"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-#   subnet_id           = azurerm_subnet.endpoint.id
-# 
-#   private_service_connection {
-#     name                           = "example-privateserviceconnection"
-#     private_connection_resource_id = azurerm_private_link_service.example.id
-#     is_manual_connection           = false
-#   }
-# }

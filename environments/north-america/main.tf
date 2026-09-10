@@ -19,6 +19,7 @@ module "network" {
   datacenter_location = var.datacenter_location
   resource_group_name = module.resource_groups.resource_group_names["network"]
   address_space       = ["10.204.8.0/21"]
+  dns_servers         = [local.dc_private_ip]
   subnets = {
     gateway  = ["10.204.8.0/24"]
     services = ["10.204.9.0/24"]
@@ -26,17 +27,16 @@ module "network" {
   tags = local.common_tags
 }
 
-# module "vpn-gateway" {
-#   source              = "../../modules/vpn-gateway"
-#   location_code       = var.location_code
-#   datacenter_location = var.datacenter_location
-#   resource_group_name = module.resource_groups.resource_group_names["network"]
-#   gateway_subnet_id   = module.network.gateway_subnet_id
-#   vpn_client_address_pool = ["172.16.201.0/24"]
-#   # vpn_root_cert_data      = file("./certs/rootCA.pem")
-#   vpn_root_cert_data      = file("./certs/rootCA.der.base64")
-#   tags = local.common_tags
-# }
+module "vpn-gateway" {
+  source                   = "../../modules/vpn-gateway"
+  location_code            = var.location_code
+  datacenter_location      = var.datacenter_location
+  resource_group_name      = module.resource_groups.resource_group_names["network"]
+  gateway_subnet_id        = module.network.subnet_ids["gateway"]
+  vpn_client_address_pool  = ["172.16.201.0/24"]
+  vpn_root_cert_data       = file("./certs/rootCA.der.base64")
+  tags                     = local.common_tags
+}
 
 
 module "storage" {
@@ -51,15 +51,16 @@ module "storage" {
 }
 
 
-# module "virtual-machine" {
-#   source = "../../modules/virtual-machine"
-#   location_code       = var.location_code
-#   datacenter_location = var.datacenter_location
-#   resource_group_name = module.resource_groups.resource_group_names["infra"]
-#   subnet_id = module.network.subnet_ids["services"]
-#   vm_name = "dc-01"
-#   vm_size = "Standard_DS1_v2"
-#   vm_sku = "2025-datacenter-azure-edition"
-#   tags = local.common_tags
-#   admin_password = var.admin_password
-# }
+module "virtual-machine" {
+  source               = "../../modules/virtual-machine"
+  location_code        = var.location_code
+  datacenter_location  = var.datacenter_location
+  resource_group_name  = module.resource_groups.resource_group_names["infra"]
+  subnet_id            = module.network.subnet_ids["services"]
+  private_ip_address   = local.dc_private_ip
+  vm_name              = "dc-01"
+  vm_size              = "Standard_B2ls_v2"
+  vm_sku               = "2025-datacenter-azure-edition"
+  tags                 = local.common_tags
+  admin_password       = var.admin_password
+}

@@ -1,0 +1,7 @@
+subscription_id     = "<Azure Subscription ID>"
+environment         = "prod"
+datacenter_location = "<erlaubte Azure-Region, siehe README>"
+location_code       = "na"
+managed_by          = "Terraform"
+owner               = "IT Infrastructure"
+project             = "Bachelor-PoC-North-America"

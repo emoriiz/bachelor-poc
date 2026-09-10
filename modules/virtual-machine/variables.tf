@@ -11,3 +11,7 @@ variable "vm_sku" {
 variable "admin_password" {
   sensitive = true
 }
+variable "private_ip_address" {
+  type    = string
+  default = null # null = dynamische IP
+}

@@ -13,5 +13,14 @@ terraform {
 provider "azurerm" {
   subscription_id                 = var.subscription_id
   resource_provider_registrations = "none" # This is only required when the User, Service Principal, or Identity running Terraform lacks the permissions to register Azure Resource Providers.
-  features {}
+
+  features {
+    # Erlaubt das Loeschen einer Resource Group, in der noch von Terraform
+    # verwaltete Ressourcen liegen. Noetig, weil ein Regionswechsel die RG
+    # neu anlegen muss, verschachtelte Ressourcen (z.B. die Private DNS Zone)
+    # aber nicht automatisch mit ersetzt werden.
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }

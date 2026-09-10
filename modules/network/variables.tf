@@ -6,3 +6,7 @@ variable "address_space" {}
 variable "subnets" {
   type = map(list(string))
 }
+variable "dns_servers" {
+  type    = list(string)
+  default = [] # leer = Azure-DNS (168.63.129.16)
+}

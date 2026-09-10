@@ -1,17 +1,19 @@
 # https://registry.terraform.io/providers/hashicorp/Azurerm/latest/docs/resources/public_ip
 # https://registry.terraform.io/providers/hashicorp/Azurerm/latest/docs/resources/virtual_network_gateway
+# Zertifikate erzeugen / VPN-Client einrichten: siehe README.md
 
+# Öffentliche IP für das Gateway, zonenredundant (Voraussetzung für die AZ-SKU unten)
 resource "azurerm_public_ip" "vpn" {
   name                = "pip-${var.location_code}-vpn"
   location            = var.datacenter_location
   resource_group_name = var.resource_group_name
-  # allocation_method   = "Static"
   allocation_method   = "Static"
   sku                 = "Standard"
-  zones = ["1", "2", "3"]
+  zones               = ["1", "2", "3"]
   tags                = var.tags
 }
 
+# VPN-Gateway mit Point-to-Site (Zertifikats-Auth über OpenVPN)
 resource "azurerm_virtual_network_gateway" "vpn" {
   name                = "gw-${var.location_code}-vpn"
   location            = var.datacenter_location
@@ -27,7 +29,6 @@ resource "azurerm_virtual_network_gateway" "vpn" {
     subnet_id                     = var.gateway_subnet_id
   }
 
-  # Point-to-Site Konfiguration
   vpn_client_configuration {
     address_space        = var.vpn_client_address_pool
     vpn_client_protocols = ["OpenVPN"]
