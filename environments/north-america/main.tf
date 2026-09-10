@@ -26,15 +26,15 @@ module "network" {
   tags = local.common_tags
 }
 
-
 # module "vpn-gateway" {
 #   source              = "../../modules/vpn-gateway"
 #   location_code       = var.location_code
 #   datacenter_location = var.datacenter_location
 #   resource_group_name = module.resource_groups.resource_group_names["network"]
 #   gateway_subnet_id   = module.network.gateway_subnet_id
-#   # vpn_client_address_pool = ["172.16.201.0/24"]     # optional, wenn P2S konfiguriert
-#   # vpn_root_cert_data      = file("./certs/rootCA.pem") # optional für P2S
+#   vpn_client_address_pool = ["172.16.201.0/24"]
+#   # vpn_root_cert_data      = file("./certs/rootCA.pem")
+#   vpn_root_cert_data      = file("./certs/rootCA.der.base64")
 #   tags = local.common_tags
 # }
 
